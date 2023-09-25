@@ -14,12 +14,13 @@
 #include <SFML/Window/WindowStyle.hpp>
 
 #define NUM_OF_STARTING_CELLS   10000
-#define SIZE_OF_CELL            16 
+#define SIZE_OF_CELL            4
+#define TIME_PAUSE              0
 #define WHITE                   255, 255, 255
 #define BLACK                   0  , 0  , 0
 
-void getShapesFromMatrix(std::vector< std::vector<bool> >& matrix, std::vector< sf::RectangleShape >& shapes){
-    sf::RectangleShape rectTemplate(sf::Vector2f(SIZE_OF_CELL, SIZE_OF_CELL));
+void getShapesFromMatrix(std::vector< std::vector<bool> >& matrix, std::vector< sf::RectangleShape >& shapes, char cellSize){
+    sf::RectangleShape rectTemplate(sf::Vector2f(cellSize, cellSize));
     rectTemplate.setFillColor(sf::Color(WHITE));
     
     shapes.clear();
@@ -27,7 +28,7 @@ void getShapesFromMatrix(std::vector< std::vector<bool> >& matrix, std::vector< 
     for(int i = 0; i < matrix.size(); i++){
         for(int j = 0; j < matrix[0].size(); j++){
             if(matrix[i][j]){
-                rectTemplate.setPosition(j * SIZE_OF_CELL, i * SIZE_OF_CELL);
+                rectTemplate.setPosition(j * cellSize, i * cellSize);
                 shapes.push_back(rectTemplate);
             }
         }
@@ -36,14 +37,14 @@ void getShapesFromMatrix(std::vector< std::vector<bool> >& matrix, std::vector< 
     return;
 }
 
-void randomFillMatrix(std::vector< std::vector<bool> >& matrix){
+void randomFillMatrix(std::vector< std::vector<bool> >& matrix, int cellNumber){
     srand(time(0));
     
     int matrixHeight = matrix.size();
     int matrixWidth  = matrix[0].size();
     int rnd, h, w;
     
-    for(int i = 0; i < NUM_OF_STARTING_CELLS; i++){
+    for(int i = 0; i < cellNumber; i++){
         rnd = rand(), w = rand() % (matrixWidth - 2) + 1, h = rand() % (matrixHeight - 2) + 1;
         matrix[h][w] = true;
     }
@@ -110,12 +111,33 @@ void updateCellMatrix(std::vector< std::vector<bool>>& currMatrix){
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(600, 600), "Conway's Game of Life", sf::Style::Fullscreen);
+    char cellSize = SIZE_OF_CELL;
+    int cellNumber = NUM_OF_STARTING_CELLS, timeInterval = TIME_PAUSE;
+    std::string cellSizeInput, cellNumberInput, timeIntervalInput;
+    bool choseDefault = false;
+    //Input all variables like cell size, simulation speed etc.
+    std::cout <<    "Welcome to Conway's Game of Life.\n You will now be prompted to input parameters that dictate how the simulation will take place.\n If you would like to leave a parameter default, input 'd'.\n If you would like to leave all the parameters default, input 'D'.\n You can exit the simulation at any point by clicking Escape.\n You can pause the simulation at any point by clicking Space.\n\n";
 
-    // Load font
-    sf::Font font;
-    if(!font.loadFromFile("NotoSansCJK-Regular.ttc")) std::cout << "Failed to load font from file" << std::endl;
-    else    std::cout << "Successfully loaded font from file" << std::endl;
+    if(!choseDefault){
+        std::cout << "Set the size of the cells [in pixels]: \n";
+        std::cin >> cellSizeInput;
+        if(cellSizeInput == "D") choseDefault = true;
+        else if(cellSizeInput != "d") cellSize = std::stoi(cellSizeInput);
+    }
+    if(!choseDefault){
+        std::cout << "Set the number of cells to be randomly generated at the start of the simulation: \n";
+        std::cin >> cellNumberInput;
+        if(cellNumberInput == "D") choseDefault = true;
+        else if(cellNumberInput != "d") cellNumber = std::stoi(cellNumberInput);
+    }
+    if(!choseDefault){
+        std::cout << "Set the time interval between frames [in milliseconds]: \n";
+        std::cin >> timeIntervalInput;
+        if(timeIntervalInput == "D") choseDefault = true;
+        else if(timeIntervalInput != "d") timeInterval = std::stoi(timeIntervalInput) * 1000; // usleep takes time interval in microseconds
+    }
+
+    sf::RenderWindow window(sf::VideoMode(600, 600), "Conway's Game of Life", sf::Style::Fullscreen);
 
     // Get height and width of screen 
     int screenHeight, screenWidth;
@@ -123,11 +145,11 @@ int main()
     screenWidth  = sf::VideoMode::getDesktopMode().width;
 
     // Create cell matrix
-    size_t matrixWidth = screenWidth / SIZE_OF_CELL, matrixHeight = screenHeight / SIZE_OF_CELL;
+    size_t matrixWidth = screenWidth / cellSize, matrixHeight = screenHeight / cellSize;
     std::vector< std::vector<bool> > mainMatrix(matrixHeight + 2, std::vector<bool>(matrixWidth + 2, false));
 
     // Fill matrix at the beginning
-    randomFillMatrix(mainMatrix);
+    randomFillMatrix(mainMatrix, cellNumber);
 
     bool gamePaused = false;
 
@@ -172,26 +194,16 @@ int main()
         // Draw new frame
         window.clear();
 
-        sf::Text pauseText;
-        pauseText.setFont(font);
-        pauseText.setCharacterSize(24);
-        pauseText.setPosition(screenWidth/2 - 50, screenHeight/2 - 25);
-        if(gamePaused)  pauseText.setString("Paused");
-        else            pauseText.setString("");
-        pauseText.setFillColor(sf::Color(WHITE));
-
         if(!gamePaused){
             std::vector< sf::RectangleShape > liveCellShapes;
-            getShapesFromMatrix(mainMatrix, liveCellShapes);
+            getShapesFromMatrix(mainMatrix, liveCellShapes, cellSize);
             drawRectangles(liveCellShapes, &window);
             updateCellMatrix(mainMatrix);
         }
 
-        window.draw(pauseText);
-
         window.display();
 
-        usleep(100000);
+        usleep(timeInterval);
     }
 
     return 0;
