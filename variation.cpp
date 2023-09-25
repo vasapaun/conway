@@ -36,17 +36,15 @@ void getShapesFromMatrix(std::vector< std::vector<bool> >& matrix, std::vector< 
     return;
 }
 
-void randomFillMatrix(std::vector< std::vector<bool> >& matrix){
+void fillMatrix(std::vector< std::vector<bool> >& matrix){
     srand(time(0));
     
     int matrixHeight = matrix.size();
     int matrixWidth  = matrix[0].size();
-    int rnd, h, w;
-    
-    for(int i = 0; i < NUM_OF_STARTING_CELLS; i++){
-        rnd = rand(), w = rand() % (matrixWidth - 2) + 1, h = rand() % (matrixHeight - 2) + 1;
-        matrix[h][w] = true;
-    }
+
+    matrix[matrixHeight / 2][matrixWidth / 2 - 1] = true;
+    matrix[matrixHeight / 2][matrixWidth / 2]     = true;
+    matrix[matrixHeight / 2][matrixWidth / 2 + 1] = true;
 
     return;
 }
@@ -125,10 +123,8 @@ int main()
     size_t matrixWidth = screenWidth / SIZE_OF_CELL, matrixHeight = screenHeight / SIZE_OF_CELL;
     std::vector< std::vector<bool> > mainMatrix(matrixHeight + 2, std::vector<bool>(matrixWidth + 2, false));
 
-    std::cout << "Matrix dimensions from inside main: " << matrixHeight << 'x' << matrixWidth << std::endl;
-
     // Fill matrix at the beginning
-    randomFillMatrix(mainMatrix);
+    fillMatrix(mainMatrix);
 
     bool gamePaused = false;
 

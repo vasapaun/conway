@@ -13,8 +13,8 @@
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/WindowStyle.hpp>
 
-#define NUM_OF_STARTING_CELLS   100
-#define SIZE_OF_CELL            4
+#define NUM_OF_STARTING_CELLS   10000
+#define SIZE_OF_CELL            16 
 #define WHITE                   255, 255, 255
 #define BLACK                   0  , 0  , 0
 
@@ -43,14 +43,10 @@ void randomFillMatrix(std::vector< std::vector<bool> >& matrix){
     int matrixWidth  = matrix[0].size();
     int rnd, h, w;
     
-    /*for(int i = 0; i < NUM_OF_STARTING_CELLS; i++){
+    for(int i = 0; i < NUM_OF_STARTING_CELLS; i++){
         rnd = rand(), w = rand() % (matrixWidth - 2) + 1, h = rand() % (matrixHeight - 2) + 1;
         matrix[h][w] = true;
-    }*/
-
-    matrix[matrixHeight / 2][matrixWidth / 2] = true;
-    matrix[matrixHeight / 2][matrixWidth / 2 - 1] = true;
-    matrix[matrixHeight / 2][matrixWidth / 2 + 1] = true;
+    }
 
     return;
 }
@@ -62,64 +58,40 @@ void drawRectangles(const std::vector< sf::RectangleShape >& rectangles, sf::Ren
     return;
 }
 
-bool lives(char count){
-    if(count < 2 || count > 3)
-        return false;
-    return true;
+bool lives(char count, bool alive){
+    if(alive && (count == 2 || count ==3))  return true;
+    if(!alive && count == 3)    return true;
+    return false;
 }
 
 bool updateSingleCell(int i, int j, std::vector< std::vector<bool> >& matrix){
-    int count = 0; // matrixHeight = matrix.size(), matrixWidth = matrix[0].size();
+    char count = 0; // matrixHeight = matrix.size(), matrixWidth = matrix[0].size();
+
     count = matrix[i - 1][j - 1] + matrix[i - 1][j] + matrix[i - 1][j + 1] +
                     matrix[i][j - 1] +     matrix[i][j + 1] +
                     matrix[i + 1][j - 1] + matrix[i + 1][j] + matrix[i + 1][j + 1];
-    return lives(count); 
+
+    return lives(count, matrix[i][j]);
+}
+
+void printAllLiveCells(std::vector< std::vector<bool> >& matrix){
+    for(int i = 1; i < matrix.size() - 1; i++)
+        for(int j = 1; j < matrix[0].size() - 1; j++)
+            if(matrix[i][j])    std::cout << i << " " << j << " " << updateSingleCell(i, j, matrix)  << std::endl;
 }
 
 void updateCellMatrix(std::vector< std::vector<bool>>& currMatrix){
     // Special cases are edge cells, so we update the 4 corner cells first, then the 4 edges, and then we update
     // the inner matrix regularly with a double for loop. We can't overwrite the matrix before calculating the next
     // state of all the cells, based on the current matrix
-    
-    int matrixHeight = currMatrix.size(), matrixWidth = currMatrix[0].size();
 
-    std::cout << "Matrix dimensions from inside updateCellMatrix: " << matrixHeight << 'x' << matrixWidth << std::endl;
+    int matrixHeight = currMatrix.size(), matrixWidth = currMatrix[0].size();
 
     // We allocate space for a new matrix with the same dimensions as the current matrix
     std::vector< std::vector<bool> > newMatrix(matrixHeight, std::vector<bool>(matrixWidth, false));
 
     char count;
 
-    // Corner cell calculation in order of: top-left, top-right, bottom-left, bottom-right
-    // Possible readability fix : Make matrix one size bigger in both dimensions, fill the border with permanently dead cells, make this function update "actual size" matrix
-    count = currMatrix[0][1] + currMatrix[1][0] + currMatrix[1][1];
-    if(lives(count))    newMatrix[0][0] = true;
-
-    count = currMatrix[0][matrixWidth - 2] + currMatrix[1][matrixWidth - 1] + currMatrix[1][matrixWidth - 2];
-    if(lives(count))    newMatrix[0][matrixWidth - 1] = true;
-
-   count = currMatrix[matrixHeight - 2][0] + currMatrix[matrixHeight - 2][1] + currMatrix[matrixHeight - 1][1];
-    if(lives(count))    newMatrix[matrixHeight - 1][0] = true;
-
-    count = currMatrix[matrixHeight - 2][matrixWidth - 1] + currMatrix[matrixHeight - 2][matrixWidth - 2] + currMatrix[matrixHeight - 1][matrixWidth - 2];
-    if(lives(count))    newMatrix[0][0] = true;
-
-    // Edge calculation (without corners) in order: top, right, bottom, left
-    for(int i = 1; i < matrixHeight - 1; i++){
-        count = currMatrix[0][i - 1] + currMatrix[0][i + 1] + currMatrix[1][i - 1] + currMatrix[1][i] + currMatrix[1][i + 1];
-        if(lives(count))    newMatrix[0][i] = true;
-
-        count = currMatrix[i - 1][matrixWidth - 1] + currMatrix[i - 1][matrixWidth - 2] + currMatrix[i][matrixWidth - 2] + currMatrix[i + 1][matrixWidth - 1] + currMatrix[i + 1][matrixWidth - 2];
-        if(lives(count))    newMatrix[matrixWidth - 1][i] = true;
-
-        count = currMatrix[matrixHeight - 1][i - 1] + currMatrix[matrixHeight - 1][i + 1] + currMatrix[matrixHeight - 2][i - 1] + currMatrix[matrixHeight - 2][i] + currMatrix[matrixHeight - 2][i + 1];
-        if(lives(count))    newMatrix[matrixHeight - 1][i] = true;
-
-        count = currMatrix[i -1][0] + currMatrix[i + 1][0] + currMatrix[i - 1][0] + currMatrix[i][0] + currMatrix[i + 1][0];
-        if(lives(count))    newMatrix[i][0] = true;
-    }
-
-    // Inner matrix calculation
     for(int i = 1; i < matrixHeight - 1; i++){
         for(int j = 1; j < matrixWidth - 1; j++){
             newMatrix[i][j] = updateSingleCell(i, j,currMatrix); 
@@ -127,8 +99,8 @@ void updateCellMatrix(std::vector< std::vector<bool>>& currMatrix){
     }
 
     //Copy the new matrix into "current" matrix
-    for(int i = 0; i < matrixHeight; i++){
-        for(int j = 0; j < matrixWidth; j++){
+    for(int i = 1; i < matrixHeight - 1; i++){
+        for(int j = 1; j < matrixWidth - 1; j++){
             currMatrix[i][j] = newMatrix[i][j];
         }
     }
@@ -153,8 +125,6 @@ int main()
     // Create cell matrix
     size_t matrixWidth = screenWidth / SIZE_OF_CELL, matrixHeight = screenHeight / SIZE_OF_CELL;
     std::vector< std::vector<bool> > mainMatrix(matrixHeight + 2, std::vector<bool>(matrixWidth + 2, false));
-
-    std::cout << "Matrix dimensions from inside main: " << matrixHeight << 'x' << matrixWidth << std::endl;
 
     // Fill matrix at the beginning
     randomFillMatrix(mainMatrix);
@@ -221,7 +191,7 @@ int main()
 
         window.display();
 
-        //usleep(10000);
+        usleep(100000);
     }
 
     return 0;
