@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
-#include <chrono>
 #include <unistd.h>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
@@ -119,19 +118,19 @@ int main()
     std::cout <<    "Welcome to Conway's Game of Life.\n You will now be prompted to input parameters that dictate how the simulation will take place.\n If you would like to leave a parameter default, input 'd'.\n If you would like to leave all the parameters default, input 'D'.\n You can exit the simulation at any point by clicking Escape.\n You can pause the simulation at any point by clicking Space.\n\n";
 
     if(!choseDefault){
-        std::cout << "Set the size of the cells [in pixels]: \n";
+        std::cout << "Set the size of the cells in pixels [default: 4]: \n";
         std::cin >> cellSizeInput;
         if(cellSizeInput == "D") choseDefault = true;
         else if(cellSizeInput != "d") cellSize = std::stoi(cellSizeInput);
     }
     if(!choseDefault){
-        std::cout << "Set the number of cells to be randomly generated at the start of the simulation: \n";
+        std::cout << "Set the number of cells to be randomly generated at the start of the simulation [default 10000]: \n";
         std::cin >> cellNumberInput;
         if(cellNumberInput == "D") choseDefault = true;
         else if(cellNumberInput != "d") cellNumber = std::stoi(cellNumberInput);
     }
     if(!choseDefault){
-        std::cout << "Set the time interval between frames [in milliseconds]: \n";
+        std::cout << "Set the time interval between frames in milliseconds [default 0, use this if the simulation is too quick otherwise] \n";
         std::cin >> timeIntervalInput;
         if(timeIntervalInput == "D") choseDefault = true;
         else if(timeIntervalInput != "d") timeInterval = std::stoi(timeIntervalInput) * 1000; // usleep takes time interval in microseconds
