@@ -2,8 +2,11 @@
 
 ## IMPORTANT 
 This project was built using SFML 2.6 
+
 The newest SFML 3.0 is not backwards-compatible.
+
 To compile this project, use SFML 2.6
+
 Alternatively, you can download the executable from the releases page [soon].
 
 ## Description
