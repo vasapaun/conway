@@ -10,7 +10,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Keyboard.hpp>
-#include <SFML/Window/WindowStyle.hpp>
+#include <SFML/Window.hpp>
 
 #define NUM_OF_STARTING_CELLS   10000
 #define SIZE_OF_CELL            4
