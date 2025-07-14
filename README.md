@@ -1,7 +1,3 @@
-
-
-https://github.com/user-attachments/assets/478c059b-ea0c-4c66-be89-76068a84e945
-
 # Conway's Game of Life 
 
 ## Videos
