@@ -1,11 +1,15 @@
+
+
+https://github.com/user-attachments/assets/478c059b-ea0c-4c66-be89-76068a84e945
+
 # Conway's Game of Life 
 
 ## Videos
 *Contains flashing images*
 
-[Conway's Game of Life](videos/conway.mp4)
+https://github.com/user-attachments/assets/24c96b9e-0afb-418b-be9d-2c6cf4e0bc2d
 
-[Variation](videos/variation.mp4)
+https://github.com/user-attachments/assets/ee9d745a-0640-4faa-ae58-974524848719
 
 ## IMPORTANT 
 This project was built using SFML 2.6 
